@@ -41,6 +41,12 @@ int main(int argc, char *argv[])
 	const char* tun_child_name;
 	char cmdbuf[128];
 
+	if (argc < 5) {
+		fprintf(stderr, "Usage: %s <parent tun name> <child tun name> <startup script> <command>\n",
+				argc > 0 ? argv[0] : "tunexec");
+		return 1;
+	}
+
 	if ((err = pipe2(readyfd, O_CLOEXEC)) != 0) {
 		fprintf(stderr, "pipe2: %d %d %s\n", err, errno, strerror(errno));
 		return err;
@@ -115,10 +121,7 @@ int main(int argc, char *argv[])
 
 	sprintf(cmdbuf, "/sbin/ip link set dev %s netns %d", tun_child_name, p);
 	logged_system(cmdbuf);
-	sprintf(cmdbuf, "/sbin/ip ad ad %s dev %s", argv[3], tun_parent_name);
-	logged_system(cmdbuf);
-	sprintf(cmdbuf, "/sbin/ip link set up dev %s", tun_parent_name);
-	logged_system(cmdbuf);
+	logged_system(argv[3]);
 
 	goto tun_finished;
 
